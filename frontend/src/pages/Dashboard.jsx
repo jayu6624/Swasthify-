@@ -1,657 +1,234 @@
-import {
-  CircularProgress, Switch, Drawer, List, ListItem, ListItemIcon, ListItemText,
-  Box, AppBar, Toolbar, Button, IconButton, Card, Typography
-} from "@mui/material";
+import React, { useState, useEffect } from 'react';
+// Import icons from react-icons
 import { 
-  ArrowDropDown, ChevronLeft, ChevronRight, FitnessCenter, 
-  LocalDrink, Restaurant, Bed, MonitorWeight, Add, Menu as MenuIcon,
-  Chat, Camera, Person
-} from "@mui/icons-material";
-import { format, subDays } from "date-fns";
-import { useState, useRef } from 'react';
+  FaHome, FaUtensils, FaRunning, FaChartBar, FaWater,
+  FaBed, FaHeartbeat, FaWalking, FaCamera, FaBell, FaUser,
+  FaChevronLeft, FaChevronRight, FaPlus
+} from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion'; 
+import Sidebar from '../components/Sidebar';
+import TopNavigation from '../components/TopNavigation';
+import DateSelector from '../components/DateSelector';
+import DashboardContent from '../components/DashboardContent';
+import NutritionContent from '../components/NutritionContent';
+import ActivitiesContent from '../components/ActivitiesContent';
+import ReportsContent from '../components/ReportsContent';
 
-export default function Dashboard() {
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), "dd-MM"));
-  const [isOpen, setIsOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const scrollRef = useRef(null);
-  const cardsScrollRef = useRef(null);
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
+     
+// Main Dashboard Component
+const Dashboard = () => {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(6); // Default to day 6 (Tuesday)
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const sections = ['dashboard', 'nutrition', 'activities', 'reports'];
+
+  // Dummy user data
+  const userData = {
+    name: 'User',
+    calorieGoal: 2000,
+    currentCalories: 1450,
+    macros: {
+      protein: { current: 85, goal: 120 },
+      carbs: { current: 180, goal: 250 },
+      fat: { current: 45, goal: 65 },
+      fiber: { current: 18, goal: 30 }
+    },
+    weeklyCalories: [
+      { day: 'Mon', calories: 1490 },
+      { day: 'Tue', calories: 1598 },
+      { day: 'Wed', calories: 1650 },
+      { day: 'Thu', calories: 1452 },
+      { day: 'Fri', calories: 1826 },
+      { day: 'Sat', calories: 1326 },
+      { day: 'Sun', calories: 1320 },
+    ],
+    activities: [
+      { type: 'Walking', duration: '30 min', calories: 150 },
+      { type: 'Cycling', duration: '45 min', calories: 320 },
+      { type: 'Gym', duration: '60 min', calories: 400 },
+    ],
+    water: { current: 5, goal: 8 }, // In glasses
+    sleep: { hours: 7.5, quality: 'Good' },
+    heartRate: { current: 72, min: 65, max: 140 },
+    steps: { current: 8500, goal: 10000 }
   };
 
-  const handleDateClick = (date) => {
-    setSelectedDate(format(new Date(date), "dd-MM"));
-    setIsOpen(false);
-  };
+  useEffect(() => {
+    // Update date every minute
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000);
 
-  const dates = [...Array(120)].map((_, i) => {
-    const date = subDays(new Date(), i);
-    return {
-      fullDate: format(date, "yyyy-MM-dd"),
-      day: format(date, "EEE"),
-      dateNum: format(date, "dd"),
+    return () => {
+      clearInterval(timer);
     };
-  }).reverse();
+  }, []);
 
-  const scrollLeft = () => scrollRef.current?.scrollBy({ left: -150, behavior: "smooth" });
-  const scrollRight = () => scrollRef.current?.scrollBy({ left: 150, behavior: "smooth" });
-
-  const progressData = [
-    { name: "Food", icon: <Restaurant fontSize="large" />, progress: 70 },
-    { name: "Weight", icon: <MonitorWeight fontSize="large" />, progress: 50 },
-    { name: "Exercise", icon: <FitnessCenter fontSize="large" />, progress: 80 },
-    { name: "Sleep", icon: <Bed fontSize="large" />, progress: 60 },
-    { name: "Water", icon: <LocalDrink fontSize="large" />, progress: 90 },
-  ];
-
-  const navItems = [
-    { label: 'Dashboard', icon: <MonitorWeight /> },
-    { label: 'Chat', icon: <Chat /> },
-    { label: 'Snap', icon: <Camera /> },
-    { label: 'Profile', icon: <Person /> },
-    { 
-      label: darkMode ? 'Light Mode' : 'Dark Mode', 
-      icon: <Switch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
+  const navigateSection = (direction) => {
+    if (direction === 'next' && activeSectionIndex < sections.length - 1) {
+      setActiveSectionIndex(activeSectionIndex + 1);
+    } else if (direction === 'prev' && activeSectionIndex > 0) {
+      setActiveSectionIndex(activeSectionIndex - 1);
     }
-  ];
+  };
 
-  const foodCard = progressData.find(item => item.name === "Food");
-  const otherCards = progressData.filter(item => item.name !== "Food");
-
-  const scrollOneCard = (direction) => {
-    const container = cardsScrollRef.current;
-    if (!container) return;
-    
-    const cardWidth = 200;
-    const gap = 24;
-    const scrollDistance = cardWidth + gap;
-    
-    container.scrollBy({ 
-      left: direction === 'left' ? -scrollDistance : scrollDistance, 
-      behavior: 'smooth' 
-    });
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   return (
-    <Box
-      sx={{
-        bgcolor: darkMode ? "#121212" : "#f5f5f5",
-        minHeight: "100vh",
-        color: darkMode ? "white" : "black",
-        position: "relative",
-        overflow: "hidden",
-        width: "100%",
-        maxWidth: "100%"
-      }}
-    >
-      {/* AppBar */}
-      <AppBar
-        position="sticky"
-        sx={{
-          bgcolor: darkMode ? "black" : "#ffffff",
-          color: darkMode ? "white" : "black",
-          boxShadow: "0px 2px 4px rgba(0,0,0,0.1)",
-          position: "relative",
-          width: "100%",
-          left: 0,
-          transform: "none",
-          px: 0
-        }}
-        elevation={1}
-      >
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "100%",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            px: { xs: 2, sm: 3 }
-          }}
-        >
-          <Button
-            variant="contained"
-            endIcon={<ArrowDropDown />}
-            onClick={() => setIsOpen(!isOpen)}
-            sx={{
-              fontSize: 18,
-              fontWeight: "bold",
-              background: darkMode ? "#b30000" : "#007acc",
-              color: "white",
-              borderRadius: 5,
-              px: 2,
-              py: 1,
-              "&:hover": {
-                background: darkMode ? "#cc0000" : "#0088cc",
-                borderColor: darkMode ? "#ff4d4d" : "#007acc"
-              },
-              "&.MuiButton-contained": {
-                border: `2px solid ${darkMode ? "#ff4d4d" : "#007acc"}`
-              }
+    <div className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden">
+      {/* Sidebar - Hidden on mobile by default, shown via menu button */}
+      <div className={`${
+        isSidebarCollapsed ? 'hidden' : 'fixed inset-0 z-20 bg-black bg-opacity-50 md:hidden'
+      }`} onClick={toggleSidebar}>
+        <div className="fixed inset-y-0 left-0 w-64 bg-white transform transition-transform duration-200 ease-in-out">
+          <Sidebar 
+            isCollapsed={isSidebarCollapsed} 
+            toggleSidebar={toggleSidebar}
+            activeSection={sections[activeSectionIndex]}
+            onSectionChange={(section) => {
+              setActiveSectionIndex(sections.indexOf(section));
+              if (window.innerWidth < 768) toggleSidebar();
             }}
-          >
-            {selectedDate === format(new Date(), "dd-MM") ? "Today" : selectedDate}
-          </Button>
+          />
+        </div>
+      </div>
 
-          <IconButton
-            edge="end"
-            color="inherit"
-            aria-label="menu"
-            onClick={handleDrawerToggle}
-            sx={{
-              color: darkMode ? "#ff4d4d" : "#007acc",
-              bgcolor: darkMode ? "rgba(255,77,77,0.1)" : "rgba(0,122,204,0.1)",
-              "&:hover": {
-                bgcolor: darkMode ? "rgba(255,77,77,0.2)" : "rgba(0,122,204,0.2)"
-              }
-            }}
-          >
-            <MenuIcon fontSize="medium" />
-          </IconButton>
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed} 
+          toggleSidebar={toggleSidebar}
+          activeSection={sections[activeSectionIndex]}
+          onSectionChange={(section) => setActiveSectionIndex(sections.indexOf(section))}
+        />
+      </div>
 
-          <Drawer
-            anchor="right"
-            open={drawerOpen}
-            onClose={handleDrawerToggle}
-            sx={{
-              "& .MuiDrawer-paper": {
-                width: 240,
-                bgcolor: darkMode ? "#1e1e1e" : "white",
-                color: darkMode ? "white" : "black",
-                boxShadow: "-4px 0 8px rgba(0,0,0,0.1)"
-              }
-            }}
-          >
-            <List sx={{ pt: 2 }}>
-              {navItems.map((item) => (
-                <ListItem
-                  key={item.label}
-                  button
-                  onClick={item.onClick || handleDrawerToggle}
-                  sx={{
-                    py: 1.5,
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(255,77,77,0.1)" : "rgba(0,122,204,0.1)"
-                    }
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      color: darkMode ? "#ff4d4d" : "#007acc",
-                      minWidth: 40
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    sx={{
-                      "& .MuiTypography-root": {
-                        fontWeight: 500,
-                        fontSize: "1rem"
-                      }
-                    }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Drawer>
-        </Toolbar>
-      </AppBar>
-
-      <Box>
-        {/* Date Selection */}
-        <Box sx={{ p: 3 }}>
-          {isOpen && (
-            <Box sx={{ display: "flex", alignItems: "center", mt: 3 }}>
-              <IconButton onClick={scrollLeft} sx={{ color: darkMode ? "#ff4d4d" : "#007acc" }}>
-                <ChevronLeft />
-              </IconButton>
-
-              <Box
-                ref={scrollRef}
-                sx={{
-                  display: "flex",
-                  overflowX: "auto",
-                  scrollBehavior: "smooth",
-                  whiteSpace: "nowrap",
-                  gap: 2,
-                  px: 1,
-                  "&::-webkit-scrollbar": { display: "none" },
-                  msOverflowStyle: "none",
-                  scrollbarWidth: "none"
-                }}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Navigation with hamburger menu for mobile */}
+        <div className="bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button 
+                className="md:hidden mr-4 text-gray-600"
+                onClick={toggleSidebar}
               >
-                {dates.map(({ fullDate, day, dateNum }) => (
-                  <Button
-                    key={fullDate}
-                    onClick={() => handleDateClick(fullDate)}
-                    variant={selectedDate === format(new Date(fullDate), "dd-MM") ? "contained" : "outlined"}
-                    sx={{
-                      minWidth: 90,
-                      flexDirection: "column",
-                      alignItems: "center",
-                      fontWeight: "bold",
-                      py: 1,
-                      color: selectedDate === format(new Date(fullDate), "dd-MM") ? "white" : darkMode ? "#ff4d4d" : "#007acc",
-                      borderColor: darkMode ? "#ff4d4d" : "#007acc",
-                      bgcolor: selectedDate === format(new Date(fullDate), "dd-MM") ? (darkMode ? "#b30000" : "#007acc") : "transparent"
-                    }}
-                  >
-                    <Typography variant="body1" sx={{ fontSize: 24 }}>{dateNum}</Typography>
-                    <Typography variant="caption" sx={{ fontSize: 12 }}>{day}</Typography>
-                  </Button>
-                ))}
-              </Box>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </button>
+              <h1 className="text-xl font-semibold">Dashboard</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button className="relative">
+                <FaBell className="text-gray-500" />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  1
+                </span>
+              </button>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <FaUser className="text-gray-500" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-              <IconButton onClick={scrollRight} sx={{ color: darkMode ? "#ff4d4d" : "#007acc" }}>
-                <ChevronRight />
-              </IconButton>
-            </Box>
-          )}
-        </Box>
+        {/* Date Selector - Scrollable on mobile */}
+        <div className="p-4 bg-white border-b overflow-x-auto">
+          <div className="flex items-center min-w-max">
+            <DateSelector 
+              selectedDay={selectedDay} 
+              setSelectedDay={setSelectedDay}
+            />
+          </div>
+        </div>
 
-        {/* Food Card */}
-        <Box sx={{ 
-          display: "flex", 
-          justifyContent: "center",
-          mt: 4,
-          mb: 4
-        }}>
-          <Card
-            sx={{
-              p: 3,
-              textAlign: "center",
-              position: "relative",
-              bgcolor: darkMode ? "#2a2a2a" : "#f8f8f8",
-              color: darkMode ? "white" : "black",
-              boxShadow: "0px 8px 20px rgba(0,0,0,0.2)",
-              width: "300px",
-              transform: "scale(1.2)",
-              "&:hover": { transform: "scale(1.22)", transition: "0.3s" }
-            }}
-          >
-            {/* Main Food Progress */}
-            <Box sx={{ position: "relative", display: "inline-block" }}>
-              <CircularProgress
-                variant="determinate"
-                value={100}
-                size={100}
-                thickness={7}
-                sx={{ 
-                  color: darkMode ? "rgba(255, 77, 77, 0.2)" : "rgba(0, 122, 204, 0.2)",
-                  position: "absolute",
-                  '& .MuiCircularProgress-circle': {
-                    strokeLinecap: 'round'
-                  }
-                }}
-              />
-              <CircularProgress
-                variant="determinate"
-                value={foodCard.progress}
-                size={100}
-                thickness={7}
-                sx={{ 
-                  color: darkMode ? "#ff4d4d" : "#007acc",
-                  '& .MuiCircularProgress-circle': {
-                    strokeLinecap: 'round'
-                  }
-                }}
-              />
-              <Box sx={{ 
-                position: "absolute", 
-                top: "50%", 
-                left: "50%", 
-                transform: "translate(-50%, -50%)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 0.5
-              }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
-                    color: darkMode ? "#ff4d4d" : "#007acc",
-                    lineHeight: 1
-                  }}
-                >
-                  2348
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    fontSize: "0.7rem",
-                    color: darkMode ? "#ff4d4d" : "#007acc",
-                    opacity: 0.9,
-                    lineHeight: 1
-                  }}
-                >
-                  kcal left
-                </Typography>
-              </Box>
-            </Box>
-
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, mt: 2 }}>
-              {foodCard.name}
-            </Typography>
-
-            {/* Nutritional Progress */}
-            <Box sx={{ 
-              display: "flex", 
-              justifyContent: "space-around",
-              alignItems: "flex-start",
-              mt: 2,
-              mb: 1,
-              gap: 2
-            }}>
-              {/* Protein */}
-              <Box sx={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                alignItems: "center",
-                gap: 0.5
-              }}>
-                <Box sx={{ position: "relative", display: "inline-block" }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    size={40}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "rgba(255, 77, 77, 0.2)" : "rgba(0, 122, 204, 0.2)",
-                      position: "absolute",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                  <CircularProgress
-                    variant="determinate"
-                    value={75}
-                    size={40}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "#ff4d4d" : "#007acc",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                </Box>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    fontSize: "0.75rem",
-                    fontWeight: "medium",
-                    color: darkMode ? "#ff4d4d" : "#007acc"
-                  }}
-                >
-                  Protein
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: darkMode ? "#ff4d4d" : "#007acc",
-                    opacity: 0.9
-                  }}
-                >
-                  112/150g
-                </Typography>
-              </Box>
-
-              {/* Carbs */}
-              <Box sx={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                alignItems: "center",
-                gap: 0.5
-              }}>
-                <Box sx={{ position: "relative", display: "inline-block" }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    size={40}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "rgba(255, 77, 77, 0.2)" : "rgba(0, 122, 204, 0.2)",
-                      position: "absolute",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                  <CircularProgress
-                    variant="determinate"
-                    value={60}
-                    size={40}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "#ff4d4d" : "#007acc",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                </Box>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    fontSize: "0.75rem",
-                    fontWeight: "medium",
-                    color: darkMode ? "#ff4d4d" : "#007acc"
-                  }}
-                >
-                  Carbs
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: darkMode ? "#ff4d4d" : "#007acc",
-                    opacity: 0.9
-                  }}
-                >
-                  180/300g
-                </Typography>
-              </Box>
-
-              {/* Fats */}
-              <Box sx={{ 
-                display: "flex", 
-                flexDirection: "column", 
-                alignItems: "center",
-                gap: 0.5
-              }}>
-                <Box sx={{ position: "relative", display: "inline-block" }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    size={40}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "rgba(255, 77, 77, 0.2)" : "rgba(0, 122, 204, 0.2)",
-                      position: "absolute",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                  <CircularProgress
-                    variant="determinate"
-                    value={45}
-                    size={40}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "#ff4d4d" : "#007acc",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                </Box>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    fontSize: "0.75rem",
-                    fontWeight: "medium",
-                    color: darkMode ? "#ff4d4d" : "#007acc"
-                  }}
-                >
-                  Fats
-                </Typography>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: darkMode ? "#ff4d4d" : "#007acc",
-                    opacity: 0.9
-                  }}
-                >
-                  29/65g
-                </Typography>
-              </Box>
-            </Box>
-
-            <IconButton 
-              sx={{ 
-                position: "absolute", 
-                bottom: 10, 
-                right: 10, 
-                color: darkMode ? "#ff4d4d" : "#007acc",
-                bgcolor: darkMode ? "rgba(255,77,77,0.1)" : "rgba(0,122,204,0.1)",
-                "&:hover": {
-                  bgcolor: darkMode ? "rgba(255,77,77,0.2)" : "rgba(0,122,204,0.2)"
-                }
-              }}
+        {/* Main Content Area with Animation */}
+        <div className="flex-1 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSectionIndex}
+              initial={{ x: 300, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -300, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+              className="h-full overflow-y-auto p-4"
             >
-              <Add />
-            </IconButton>
-          </Card>
-        </Box>
+              {activeSectionIndex === 0 && (
+                <DashboardContent userData={userData} />
+              )}
+              {activeSectionIndex === 1 && (
+                <NutritionContent userData={userData} />
+              )}
+              {activeSectionIndex === 2 && (
+                <ActivitiesContent userData={userData} />
+              )}
+              {activeSectionIndex === 3 && (
+                <ReportsContent userData={userData} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-        {/* Other Cards */}
-        <Box sx={{ 
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          px: 2
-        }}>
-          <IconButton 
-            onClick={() => scrollOneCard('left')}
-            sx={{ 
-              position: "absolute",
-              left: 0,
-              zIndex: 2,
-              color: darkMode ? "white" : "black",
-              bgcolor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-              "&:hover": {
-                bgcolor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"
-              }
-            }}
+        {/* Section Navigation Controls */}
+        <div className="flex justify-center py-3 bg-white border-t">
+          <button 
+            onClick={() => navigateSection('prev')} 
+            disabled={activeSectionIndex === 0}
+            className={`mx-2 p-2 rounded-full ${activeSectionIndex === 0 ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-100'}`}
           >
-            <ChevronLeft />
-          </IconButton>
+            <FaChevronLeft />
+          </button>
+          {sections.map((section, index) => (
+            <button
+              key={section}
+              onClick={() => setActiveSectionIndex(index)}
+              className={`mx-1 w-2 h-2 rounded-full ${activeSectionIndex === index ? 'bg-green-600' : 'bg-gray-300'}`}
+            />
+          ))}
+          <button 
+            onClick={() => navigateSection('next')} 
+            disabled={activeSectionIndex === sections.length - 1}
+            className={`mx-2 p-2 rounded-full ${activeSectionIndex === sections.length - 1 ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-100'}`}
+          >
+            <FaChevronRight />
+          </button>
+        </div>
 
-          <Box 
-            ref={cardsScrollRef}
-            sx={{ 
-              display: "flex",
-              overflowX: "auto",
-              gap: 3,
-              py: 2,
-              px: 6,
-              scrollBehavior: "smooth",
-              "&::-webkit-scrollbar": { display: "none" },
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-              scrollSnapType: "x mandatory"
-            }}
-          >
-            {otherCards.map(({ name, icon, progress }) => (
-              <Card
-                key={name}
-                sx={{
-                  p: 2,
-                  textAlign: "center",
-                  position: "relative",
-                  bgcolor: darkMode ? "#1e1e1e" : "white",
-                  color: darkMode ? "white" : "black",
-                  boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                  minWidth: "200px",
-                  flex: "0 0 auto",
-                  scrollSnapAlign: "start",
-                  "&:hover": { transform: "scale(1.05)", transition: "0.3s" }
-                }}
+        {/* Bottom Navigation for Mobile */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t py-2">
+          <div className="flex justify-around">
+            {sections.map((section, index) => (
+              <button
+                key={section}
+                onClick={() => setActiveSectionIndex(index)}
+                className={`p-2 rounded-full ${
+                  activeSectionIndex === index ? 'text-green-600' : 'text-gray-500'
+                }`}
               >
-                <Box sx={{ position: "relative", display: "inline-block" }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={100}
-                    size={70}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "rgba(255, 77, 77, 0.2)" : "rgba(0, 122, 204, 0.2)",
-                      position: "absolute",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                  <CircularProgress
-                    variant="determinate"
-                    value={progress}
-                    size={70}
-                    thickness={7}
-                    sx={{ 
-                      color: darkMode ? "#ff4d4d" : "#007acc",
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round'
-                      }
-                    }}
-                  />
-                  <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                    {icon}
-                  </Box>
-                </Box>
-                <Typography variant="h6" sx={{ mt: 1 }}>{progress}%</Typography>
-                <Typography variant="caption" sx={{ fontSize: 14, fontWeight: "bold" }}>{name}</Typography>
-                <IconButton 
-                  sx={{ 
-                    position: "absolute", 
-                    bottom: 5, 
-                    right: 5, 
-                    color: darkMode ? "#ff4d4d" : "#007acc",
-                    "&:hover": {
-                      bgcolor: darkMode ? "rgba(255,77,77,0.1)" : "rgba(0,122,204,0.1)"
-                    }
-                  }}
-                >
-                  <Add />
-                </IconButton>
-              </Card>
+                {index === 0 && <FaHome />}
+                {index === 1 && <FaUtensils />}
+                {index === 2 && <FaRunning />}
+                {index === 3 && <FaChartBar />}
+              </button>
             ))}
-          </Box>
+          </div>
+        </div>
 
-          <IconButton 
-            onClick={() => scrollOneCard('right')}
-            sx={{ 
-              position: "absolute",
-              right: 0,
-              zIndex: 2,
-              color: darkMode ? "white" : "black",
-              bgcolor: darkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-              "&:hover": {
-                bgcolor: darkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.1)"
-              }
-            }}
-          >
-            <ChevronRight />
-          </IconButton>
-        </Box>
-      </Box>
-    </Box>
+        {/* Support Chat Button - Adjusted for mobile */}
+        <div className="fixed bottom-16 md:bottom-4 right-4 bg-green-500 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default Dashboard;

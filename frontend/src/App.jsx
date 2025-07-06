@@ -10,7 +10,7 @@ import Signup from "./pages/Signup.jsx";
 import Otp from "./components/Otp.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import Onboarding from "./pages/Onboarding.jsx";
-import Dashboard from "../../Dahboard/src/src/pages/Dashboard.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import { ParallaxProvider } from "react-scroll-parallax";
 import AboutPage from "./pages/AboutPage.jsx";
@@ -45,9 +45,9 @@ function App() {
             <Route
               path="/onboarding"
               element={
-                <ProtectedRoute>
+              
                   <Onboarding />
-                </ProtectedRoute>
+                
               }
             />
             <Route

@@ -15,27 +15,30 @@ const AboutPage = () => {
 
   const teamMembers = [
     {
-      name: "Alex Johnson",
+      name: "Jaydeep Rathod",
       role: "Founder & CEO",
-      image: "/placeholder.svg?height=300&width=300",
+      image: "/src/assets/images/Jaydeep.jpg",
       bio: "Former fitness coach with a passion for technology and health innovation.",
     },
     {
-      name: "Sarah Chen",
+      name: "Harsh Dhandha",
       role: "Chief Technology Officer",
-      image: "/placeholder.svg?height=300&width=300",
+      image:
+        "https://imgs.search.brave.com/PMut_mJ0AfwpIOVtu7ugHuZNsIHQ5VHQYMiTnvpB90E/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9hd3Mt/c2NkLmNoYXJ1c2F0/LmFjLmluL19uZXh0/L2ltYWdlP3VybD0v/aW1hZ2VzL3ZvbHVu/dGVlcnMvaGFyc2hf/ZC5qcGcmdz02NDAm/cT03NQ",
       bio: "AI specialist with expertise in health data analytics and machine learning.",
     },
     {
-      name: "Michael Rodriguez",
+      name: "Harsh Maheshwari",
       role: "Head of Fitness",
-      image: "/placeholder.svg?height=300&width=300",
+      image:
+        "https://imgs.search.brave.com/B2rALslkvFNoVXylz-AyM6EB9fBdBv3w-pEVwBIBEPE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMucm9ja2V0cmVh/Y2guY28vaW1hZ2Vz/L3Byb2ZpbGVfcGlj/cy92Mi4xL2RwcG0x/Mi5wbmc",
       bio: "Professional athlete and certified fitness trainer with 10+ years of experience.",
     },
     {
-      name: "Emma Williams",
+      name: "vidhi Hirwani",
       role: "Nutrition Specialist",
-      image: "/placeholder.svg?height=300&width=300",
+      image:
+        "https://imgs.search.brave.com/B2rALslkvFNoVXylz-AyM6EB9fBdBv3w-pEVwBIBEPE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMucm9ja2V0cmVh/Y2guY28vaW1hZ2Vz/L3Byb2ZpbGVfcGlj/cy92Mi4xL2RwcG0x/Mi5wbmc",
       bio: "Registered dietitian specializing in sports nutrition and wellness programs.",
     },
   ];
@@ -74,65 +77,63 @@ const AboutPage = () => {
         exit={{ opacity: 0 }}
         className="pt-16"
       >
-        {/* Hero Section */}
         <section className="relative py-20 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
-          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="inline-block px-4 py-1 rounded-full bg-blue-50 text-primary font-medium text-sm mb-4"
+          <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              {/* Text Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="z-10"
               >
-                About Us
-              </motion.span>
-              <motion.h1
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-                className="text-4xl md:text-5xl font-bold leading-tight mb-6"
-              >
-                Empowering Your Fitness Journey with AI
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-lg text-gray-700 mb-6"
-              >
-                At Swasthify, we believe in making fitness smarter and more
-                personalized. Our mission is to help everyone achieve their
-                health goals through innovative technology and data-driven
-                insights.
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-                className="text-gray-700"
-              >
-                Founded in 2023, we've already helped thousands of users
-                transform their lives through better health tracking and
-                personalized recommendations.
-              </motion.p>
-            </motion.div>
+                <motion.h1
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="text-4xl md:text-5xl font-bold leading-tight mb-6"
+                >
+                  Empowering Your Fitness Journey with AI
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                  className="text-lg text-gray-700 mb-6"
+                >
+                  At Swasthify, we believe in making fitness smarter and more
+                  personalized. Our mission is to help everyone achieve their
+                  health goals through innovative technology and data-driven
+                  insights.
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                  className="text-gray-700"
+                >
+                  Founded in 2023, we've already helped thousands of users
+                  transform their lives through better health tracking and
+                  personalized recommendations.
+                </motion.p>
+              </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="relative"
-            >
-              <Lottie
-                animationData={teamAnimation}
-                loop={true}
-                className="w-full max-w-lg mx-auto"
-              />
-            </motion.div>
+              {/* Image Content */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="relative h-[400px]"
+              >
+                <div className="absolute inset-0 justify-center flex items-center">
+                  <img
+                    src="https://media.gettyimages.com/id/639727810/photo/green-vegetables-on-wooden-table.jpg?s=612x612&w=0&k=20&c=LlmtC7VCJSNGJwMMdVcTc-KVQ9HJ_MsWTe-YLU6yM7o="
+                    alt="Healthy vegetables"
+                    className="size-3/4 object-cover rounded-2xl shadow-xl "
+                  />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
@@ -394,14 +395,14 @@ const AboutPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-primary to-green-500 text-white">
+        <section className="py-20 bg-green-500 text-white">
           <div className="container mx-auto px-4 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
-              className="text-3xl md:text-4xl font-bold mb-6"
+              className="text-3xl md:text-4xl font-bold mb-6 text-gray-900"
             >
               Join the Swasthify Community Today
             </motion.h2>
@@ -410,7 +411,7 @@ const AboutPage = () => {
               whileInView={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               viewport={{ once: true }}
-              className="text-white/90 max-w-2xl mx-auto mb-8"
+              className="text-gray-900 max-w-2xl mx-auto mb-8 "
             >
               Be part of a growing community of fitness enthusiasts and
               health-conscious individuals who are transforming their lives with
@@ -423,7 +424,7 @@ const AboutPage = () => {
               viewport={{ once: true }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white text-primary px-8 py-3 rounded-full font-medium shadow-lg"
+              className="text-black bg-white text-primary px-8 py-3 rounded-full font-medium shadow-lg"
             >
               Start Your Free Trial
             </motion.button>

@@ -35,6 +35,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const userController = require("../controllers/user.controller");
+const auth = require('../middleware/user.auth');
 
 const router = express.Router();
 
@@ -98,5 +99,7 @@ router.post(
 
   userController.checkUserStatus
 );
+
+router.put("/update-onboarding-status", auth, userController.updateonboarding);
 
 module.exports = router;

@@ -25,10 +25,23 @@ const Otp = () => {
         formData
       );
 
+      console.log("Registration response:", response.data);
+
+      // Store the token in localStorage
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        console.log("Token stored in localStorage");
+      } else {
+        console.log("No token in response");
+      }
+
+      // Clean up temporary data
+      localStorage.removeItem("tempUserData");
+
       toast.success("Registration successful!");
       setTimeout(() => {
-        navigate("/login");
-      }, 3000);
+        navigate("/onboarding");
+      }, 2000);
     } catch (error) {
       console.error("Error:", error);
       toast.error(error.response?.data?.message || "Verification failed");

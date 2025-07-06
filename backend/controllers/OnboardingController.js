@@ -69,10 +69,29 @@ exports.deleteProfile = async (req, res) => {
 // Create a new onboarding entry
 exports.createOnboarding = async (req, res) => {
   try {
-    const onboarding = new Onboarding(req.body);
+    const userId = req.user._id;
+    
+    // Check if user already has an onboarding record
+    const existingOnboarding = await Onboarding.findOne({ userId });
+    
+    if (existingOnboarding) {
+      // Update existing onboarding
+      Object.assign(existingOnboarding, req.body);
+      const updatedOnboarding = await existingOnboarding.save();
+      return res.status(200).json(updatedOnboarding);
+    }
+    
+    // Create new onboarding data
+    const onboardingData = {
+      ...req.body,
+      userId: userId
+    };
+    
+    const onboarding = new Onboarding(onboardingData);
     const newOnboarding = await onboarding.save();
     res.status(201).json(newOnboarding);
   } catch (error) {
+    console.error("Error in createOnboarding:", error);
     res.status(400).json({ message: error.message });
   }
 };

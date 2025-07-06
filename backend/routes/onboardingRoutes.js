@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const onboardingController = require("../controllers/OnboardingController");
+const { protect } = require("../middleware/authMiddleware");
 
 // Create new onboarding
-router.post("/create", onboardingController.createOnboarding);
+router.post("/create", protect, onboardingController.createOnboarding);
 
 // Get all onboarding entries
 router.get("/", onboardingController.getAllOnboarding);

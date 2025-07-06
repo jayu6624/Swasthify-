@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import {Link} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"; // Add axios import
 import { toast } from "react-toastify"; // Add toast notification import
 const Onboarding = () => {
@@ -9,23 +9,19 @@ const Onboarding = () => {
   const [transitionDirection, setTransitionDirection] = useState("next");
   const [pageValidation, setPageValidation] = useState({});
   const animationRef = useRef(null);
+  const navigate = useNavigate();
 
   // Load initial form data from localStorage
   const [formData, setFormData] = useState(() => {
     const savedData = localStorage.getItem("onboarding");
-    const tempUserData = JSON.parse(localStorage.getItem("tempUserData")) || {};
 
     if (savedData) {
       const parsedData = JSON.parse(savedData);
-      return {
-        ...parsedData,
-        name: tempUserData.name || parsedData.name || "", // Prioritize tempUserData name
-      };
+      return parsedData;
     }
 
     // Default initial state if no saved data
     return {
-      name: tempUserData.name || "",
       dob: "",
       city: "",
       height: "",
@@ -45,11 +41,6 @@ const Onboarding = () => {
       additionalInfo: "",
     };
   });
-
-  // Save to localStorage whenever formData changes
-  useEffect(() => {
-    localStorage.setItem("onboarding", JSON.stringify(formData));
-  }, [formData]);
 
   // Define validation rules for each page
   const validationRules = {
@@ -115,7 +106,6 @@ const Onboarding = () => {
 
     // Validate required fields
     const requiredFields = [
-      "name",
       "dob",
       "city",
       "height",
@@ -181,43 +171,87 @@ const Onboarding = () => {
   };
 
   // Function to submit data to backend
-  const handleSubmitData = async () => {
-    try {
-      const dataToSubmit = prepareDataForSubmission();
-      console.log("Submitting data:", dataToSubmit);
+  
 
-      const response = await axios.post(
-        "http://localhost:4000/api/onboarding/create",
-        dataToSubmit
-      );
-
-      if (response.data.success) {
-        // Clear onboarding data from localStorage after successful submission
-        localStorage.removeItem("onboarding");
-        toast.success("Onboarding completed successfully!");
-        navigate("/dashboard");
-      }
-    } catch (error) {
-      console.error("Submission Error Details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-
-      const errorMessage = error.response?.data?.message || error.message;
-      toast.error(`Error saving onboarding data: ${errorMessage}`);
+const handleSubmitData = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    console.log("Token from localStorage:", token);
+    
+    if (!token) {
+      toast.error("Please login first!");
+      navigate("/login");
+      return;
     }
-  };
+    console.log(token);
+    
+const dataToSubmit = prepareDataForSubmission();
+    console.log("Data to submit:", dataToSubmit);
+    console.log("Request headers:", {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+    
+    // First create onboarding data
+    const onboardingResponse = await axios.post(
+      "http://localhost:4000/api/onboarding/create",
+      dataToSubmit,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    
+    console.log("Onboarding data:", dataToSubmit);
+    
+
+    if (onboardingResponse.status === 200 || onboardingResponse.status === 201) {
+      try {
+        const updateResponse = await axios.put(
+          "http://localhost:4000/api/user/update-onboarding-status",
+          { onboardingStatus: true },
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (updateResponse.status === 200) {
+          localStorage.removeItem("onboarding");
+          toast.success("Onboarding completed successfully!");
+          navigate("/dashboard");
+        }
+      } catch (updateError) {
+        console.error("Error updating onboarding status:", updateError);
+        if (updateError.response?.status === 404) {
+          toast.error("User not found. Please login again.");
+          navigate("/login");
+        } else {
+          toast.warning("Onboarding data saved but status update failed.");
+          navigate("/dashboard");
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    const errorMessage = error.response?.data?.message || "An error occurred";
+    toast.error(errorMessage);
+  }
+};
 
   // One question per page design
   const pages = [
-    // Welcome + Name display
+    // Welcome page
     {
       bg: "linear-gradient(135deg, #8B5CF6, #6366F1)",
       text: "white",
       icon: "fa-user-circle",
-      title: "Hi there, " + formData.name + "!",
+      title: "Welcome to Swasthify!",
       content: (
         <div className="questionnaire-section">
           <p className="buffer-text">
@@ -817,7 +851,11 @@ const Onboarding = () => {
             <div className="exercise-type-grid">
               {[
                 { value: "Cardio", icon: "fa-heartbeat", color: "#EF4444" },
-                { value: "Strength", icon: "fa-dumbbell", color: "#3B82F6" },
+                {
+                  value: "Strength Training",
+                  icon: "fa-dumbbell",
+                  color: "#3B82F6",
+                }, // Updated from "Strength" to "Strength Training"
                 { value: "Yoga", icon: "fa-pray", color: "#8B5CF6" },
                 { value: "HIIT", icon: "fa-bolt", color: "#F97316" },
                 { value: "Dance", icon: "fa-music", color: "#EC4899" },
@@ -1211,8 +1249,8 @@ const Onboarding = () => {
             className="start-button pulse-animation"
             onClick={handleSubmitData}
           >
-          <Link >
-            <span>Let's Begin</span>
+            <Link>
+              <span>Let's Begin</span>
             </Link>
             <i className="fas fa-arrow-right"></i>
           </button>
@@ -1368,6 +1406,10 @@ const Onboarding = () => {
         }
 
         .page.active.transitioning-next .page-content {
+          transform: translateX(-100%);
+        }
+
+        .page.active.transitioning-prev .page-content {
           transform: translateX(-100%);
         }
 

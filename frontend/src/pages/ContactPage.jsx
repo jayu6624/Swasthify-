@@ -9,6 +9,7 @@ import { Mail, Phone, MapPin, Send, MessageSquare } from "lucide-react"
 import contactAnimation from "../assets/contact-animation.json"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
+import MapContact from "../components/MapContact"
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -48,14 +49,6 @@ const ContactPage = () => {
       <section className="relative py-20 bg-gradient-to-b from-blue-50 to-white overflow-hidden">
         <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-block px-4 py-1 rounded-full bg-blue-50 text-primary font-medium text-sm mb-4"
-            >
-              Contact Us
-            </motion.span>
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -91,15 +84,6 @@ const ContactPage = () => {
                 <span>+1 (555) 123-4567</span>
               </div>
             </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="relative"
-          >
-            <Lottie animationData={contactAnimation} loop={true} className="w-full max-w-lg mx-auto" />
           </motion.div>
         </div>
       </section>
@@ -288,7 +272,7 @@ const ContactPage = () => {
           >
             {/* Placeholder for Google Maps */}
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <p className="text-gray-500">Google Maps would be embedded here</p>
+              <MapContact />
             </div>
           </motion.div>
         </div>

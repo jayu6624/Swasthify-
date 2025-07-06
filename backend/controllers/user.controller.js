@@ -284,8 +284,20 @@ module.exports.loginUser = async (req, res) => {
       secure: true,
       sameSite: "Strict",
     });
+    console.log("tokn = " + token);
+    console.log("user = " + user);
+    
 
-    res.status(200).json({ token, user });
+    res.status(200).json({ 
+      token, 
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isOnboardingCompleted: user.isOnboardingCompleted
+      },
+      isOnboardingCompleted: user.isOnboardingCompleted
+    });
   } catch (error) {
     console.error("Error in loginUser:", error.message);
     res
@@ -310,5 +322,34 @@ module.exports.checkUserStatus = async (req, res) => {
     res.status(500).json({ 
       message: "Failed to check user status. Please try again." 
     });
+  }
+};
+
+module.exports.updateonboarding = async (req, res) => {
+  try {
+    // Get user ID from auth token instead of email
+    const userId = req.user._id; // This comes from auth middleware
+
+    // Find user by ID
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Update onboarding status
+    user.isOnboardingCompleted = true;
+    await user.save();
+
+    res.status(200).json({ 
+      message: "Onboarding completed successfully.",
+      user: {
+        name: user.name,
+        email: user.email,
+        isOnboardingCompleted: user.isOnboardingCompleted
+      }
+    });
+  } catch (error) {
+    console.error("Error updating onboarding status:", error.message);
+    res.status(500).json({ message: "Failed to update onboarding status." });
   }
 };

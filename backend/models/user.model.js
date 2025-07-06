@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  isOnboardingCompleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // JWT token generation

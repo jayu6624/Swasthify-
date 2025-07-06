@@ -4,10 +4,10 @@ const onboardingSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
+      required: true,
       unique: true,
     },
-    name: { type: String, required: true },
     dob: { type: Date, required: true },
     city: { type: String, required: true },
     height: { type: Number, required: true },
@@ -40,6 +40,7 @@ const onboardingSchema = new mongoose.Schema(
     additionalInfo: { type: String },
     bmi: { type: Number },
     submittedAt: { type: Date, default: Date.now },
+    
   },
   {
     timestamps: true,
