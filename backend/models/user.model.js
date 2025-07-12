@@ -10,13 +10,11 @@ const userSchema = new mongoose.Schema({
   },
   age: {
     type: Number,
-    required: true,
     min: [1, "Age must be a positive number"],
   },
   gender: {
     type: String,
     enum: ["Male", "Female", "Other"],
-    required: true,
   },
   email: {
     type: String,
@@ -27,12 +25,24 @@ const userSchema = new mongoose.Schema({
   number: {
     type: String,
     unique: true,
+    sparse: true,
     minlength: [10, "Phone number must be at least 10 characters long"],
   },
   password: {
     type: String,
-    required: true,
     select: false,
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  profilePicture: {
+    type: String,
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
   },
   isOnboardingCompleted: {
     type: Boolean,

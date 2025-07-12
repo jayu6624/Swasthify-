@@ -40,7 +40,6 @@ const onboardingSchema = new mongoose.Schema(
     additionalInfo: { type: String },
     bmi: { type: Number },
     submittedAt: { type: Date, default: Date.now },
-    
   },
   {
     timestamps: true,

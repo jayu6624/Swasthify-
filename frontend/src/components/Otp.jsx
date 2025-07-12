@@ -14,11 +14,13 @@ const Otp = () => {
     e.preventDefault();
     try {
       // First verify OTP
+      
       await axios.post("http://localhost:4000/api/user/verify-otp", {
         email,
         otp,
       });
-
+      console.log(formData);
+      
       // If OTP is verified, proceed with registration
       const response = await axios.post(
         "http://localhost:4000/api/user/register",
@@ -28,12 +30,15 @@ const Otp = () => {
       console.log("Registration response:", response.data);
 
       // Store the token in localStorage
+      
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         console.log("Token stored in localStorage");
       } else {
         console.log("No token in response");
       }
+      
+      
 
       // Clean up temporary data
       localStorage.removeItem("tempUserData");

@@ -188,18 +188,18 @@ module.exports.verifyOTP = async (req, res) => {
 module.exports.registerUser = async (req, res) => {
   try {
     const errors = validationResult(req);
+    console.log(errors);
+    
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() +"error in validation"});
     }
 
     const { name, age, gender, email, number, password } = req.body;
 
     if (!otpStorage[email]) {
-      return res
-        .status(400)
-        .json({
-          message: "Email not verified. Please complete OTP verification.",
-        });
+      return res.status(400).json({
+        message: "Email not verified. Please complete OTP verification.",
+      });
     }
 
     // Validate phone number format
@@ -286,17 +286,16 @@ module.exports.loginUser = async (req, res) => {
     });
     console.log("tokn = " + token);
     console.log("user = " + user);
-    
 
-    res.status(200).json({ 
-      token, 
+    res.status(200).json({
+      token,
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
-        isOnboardingCompleted: user.isOnboardingCompleted
+        isOnboardingCompleted: user.isOnboardingCompleted,
       },
-      isOnboardingCompleted: user.isOnboardingCompleted
+      isOnboardingCompleted: user.isOnboardingCompleted,
     });
   } catch (error) {
     console.error("Error in loginUser:", error.message);
@@ -311,7 +310,7 @@ module.exports.checkUserStatus = async (req, res) => {
     const { email } = req.body;
 
     const user = await userService.getUserByEmail(email);
-    
+
     if (user) {
       return res.status(200).json({ exists: true });
     }
@@ -319,8 +318,8 @@ module.exports.checkUserStatus = async (req, res) => {
     res.status(200).json({ exists: false });
   } catch (error) {
     console.error("Error checking user status:", error.message);
-    res.status(500).json({ 
-      message: "Failed to check user status. Please try again." 
+    res.status(500).json({
+      message: "Failed to check user status. Please try again.",
     });
   }
 };
@@ -340,13 +339,13 @@ module.exports.updateonboarding = async (req, res) => {
     user.isOnboardingCompleted = true;
     await user.save();
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Onboarding completed successfully.",
       user: {
         name: user.name,
         email: user.email,
-        isOnboardingCompleted: user.isOnboardingCompleted
-      }
+        isOnboardingCompleted: user.isOnboardingCompleted,
+      },
     });
   } catch (error) {
     console.error("Error updating onboarding status:", error.message);

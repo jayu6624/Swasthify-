@@ -12,6 +12,7 @@ import HomePage from "./pages/HomePage.jsx";
 import Onboarding from "./pages/Onboarding.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
+import SnapMeal from "./pages/SnapMeal.jsx";
 import { ParallaxProvider } from "react-scroll-parallax";
 import AboutPage from "./pages/AboutPage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
@@ -42,14 +43,7 @@ function App() {
             />
 
             {/* Authentication Required Routes */}
-            <Route
-              path="/onboarding"
-              element={
-              
-                  <Onboarding />
-                
-              }
-            />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route
               path="/dashboard"
               element={
@@ -63,6 +57,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/snap-meal"
+              element={
+                <ProtectedRoute>
+                  <SnapMeal />
                 </ProtectedRoute>
               }
             />

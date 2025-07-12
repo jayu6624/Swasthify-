@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios"; // Add axios import
 import { toast } from "react-toastify"; // Add toast notification import
 const Onboarding = () => {
+  const location = useLocation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState("next");
@@ -71,6 +72,21 @@ const Onboarding = () => {
       setPageValidation((prev) => ({ ...prev, [activeIndex]: isValid }));
     }
   }, [formData, activeIndex]);
+
+  // Handle Google OAuth token from URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+      // Clear any old token first
+      localStorage.removeItem("token");
+      // Store the new token
+      localStorage.setItem("token", token);
+      // Clean up the URL
+      navigate("/onboarding", { replace: true });
+    }
+  }, [location, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -171,78 +187,90 @@ const Onboarding = () => {
   };
 
   // Function to submit data to backend
-  
 
-const handleSubmitData = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    console.log("Token from localStorage:", token);
-    
-    if (!token) {
-      toast.error("Please login first!");
-      navigate("/login");
-      return;
-    }
-    console.log(token);
-    
-const dataToSubmit = prepareDataForSubmission();
-    console.log("Data to submit:", dataToSubmit);
-    console.log("Request headers:", {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
-    
-    // First create onboarding data
-    const onboardingResponse = await axios.post(
-      "http://localhost:4000/api/onboarding/create",
-      dataToSubmit,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+  const handleSubmitData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token from localStorage:", token);
+
+      if (!token) {
+        toast.error("Please login first!");
+        navigate("/login");
+        return;
       }
-    );
 
-    
-    console.log("Onboarding data:", dataToSubmit);
-    
-
-    if (onboardingResponse.status === 200 || onboardingResponse.status === 201) {
+      // Debug: Decode the token to see its structure
       try {
-        const updateResponse = await axios.put(
-          "http://localhost:4000/api/user/update-onboarding-status",
-          { onboardingStatus: true },
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (updateResponse.status === 200) {
-          localStorage.removeItem("onboarding");
-          toast.success("Onboarding completed successfully!");
-          navigate("/dashboard");
+        const tokenParts = token.split(".");
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log("Token payload:", payload);
         }
-      } catch (updateError) {
-        console.error("Error updating onboarding status:", updateError);
-        if (updateError.response?.status === 404) {
-          toast.error("User not found. Please login again.");
-          navigate("/login");
-        } else {
-          toast.warning("Onboarding data saved but status update failed.");
-          navigate("/dashboard");
+      } catch (e) {
+        console.log("Could not decode token:", e);
+      }
+
+      const dataToSubmit = prepareDataForSubmission();
+      console.log("Data to submit:", dataToSubmit);
+      console.log("Request headers:", {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      });
+
+      // First create onboarding data
+      console.log("token => " + token);
+
+      const onboardingResponse = await axios.post(
+        "http://localhost:4000/api/onboarding/create",
+        dataToSubmit,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Onboarding data:", dataToSubmit);
+
+      if (
+        onboardingResponse.status === 200 ||
+        onboardingResponse.status === 201
+      ) {
+        try {
+          const updateResponse = await axios.put(
+            "http://localhost:4000/api/user/update-onboarding-status",
+            { onboardingStatus: true },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (updateResponse.status === 200) {
+            localStorage.removeItem("onboarding");
+            toast.success("Onboarding completed successfully!");
+            navigate("/dashboard");
+          }
+        } catch (updateError) {
+          console.error("Error updating onboarding status:", updateError);
+          if (updateError.response?.status === 404) {
+            toast.error("User not found. Please login again.");
+            navigate("/login");
+          } else {
+            toast.warning("Onboarding data saved but status update failed.");
+            navigate("/dashboard");
+          }
         }
       }
+    } catch (error) {
+      console.error("Error:", error);
+      const errorMessage = error.response?.data?.message || "An error occurred";
+      toast.error(errorMessage);
     }
-  } catch (error) {
-    console.error("Error:", error);
-    const errorMessage = error.response?.data?.message || "An error occurred";
-    toast.error(errorMessage);
-  }
-};
+  };
 
   // One question per page design
   const pages = [

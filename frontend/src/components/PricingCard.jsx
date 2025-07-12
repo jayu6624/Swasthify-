@@ -60,7 +60,7 @@ const PricingCard = ({ plan, index }) => {
         whileTap={{ scale: 0.95 }}
         className={`w-full py-3 rounded-lg font-medium ${
           plan.popular
-            ? "bg-gradient-to-r from-primary to-green-500 text-white"
+            ? "bg-green-500 from-primary  text-white"
             : "bg-gray-100 text-gray-800 hover:bg-gray-200"
         }`}
       >
